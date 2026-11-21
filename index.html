@@ -6,6 +6,7 @@
   <title>מגדיר וחידון צוללנים – דגי הים התיכון</title>
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script data-goatcounter="https://yardenr.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -417,37 +418,18 @@
 
           <div id="fb-error" class="hidden text-xs text-rose-300 bg-rose-950/50 border border-rose-500/40 rounded-xl px-3 py-2"></div>
 
-          <!-- Send / Share Buttons -->
+          <!-- Send / Copy Buttons -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-            <button id="btn-fb-whatsapp" type="button" class="px-3 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="send" class="w-3.5 h-3.5"></i>
-              <span>שלח בוואטסאפ</span>
-            </button>
-            <button id="btn-fb-email" type="button" class="px-3 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-xs flex items-center justify-center gap-1.5 transition">
-              <i data-lucide="mail" class="w-3.5 h-3.5"></i>
-              <span>שלח במייל</span>
+            <button id="btn-fb-direct" type="button" class="sm:col-span-2 px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 disabled:opacity-60 disabled:cursor-not-allowed text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="send" class="w-4 h-4"></i>
+              <span id="btn-fb-direct-label">שלח הערה</span>
             </button>
             <button id="btn-fb-copy" type="button" class="px-3 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-sky-400/30 text-sky-100 font-semibold text-xs flex items-center justify-center gap-1.5 transition">
               <i data-lucide="copy" class="w-3.5 h-3.5"></i>
               <span>העתק ושמור</span>
             </button>
           </div>
-
-          <!-- Owner Recipient Settings (Collapsible) -->
-          <div class="pt-2 border-t border-sky-400/15">
-            <button id="btn-toggle-owner-cfg" type="button" class="text-[11px] text-sky-300/80 hover:text-cyan-300 flex items-center gap-1 transition">
-              <i data-lucide="settings" class="w-3.5 h-3.5"></i>
-              <span>הגדרת יעד קבלת ההערות (מייל / וואטסאפ של בעל הכלי)</span>
-            </button>
-            <div id="owner-cfg-box" class="hidden mt-2.5 p-3 rounded-xl bg-slate-900/80 border border-sky-400/20 space-y-2.5">
-              <p class="text-[11px] text-sky-200/80 leading-relaxed">הזן כאן את המייל או הוואטסאפ שלך (בפורמט 9725XXXXXXXX) כדי שההערות ייפתחו ישירות אליך. לפני פרסום לציבור, ניתן גם לעדכן את <code>OWNER_CONFIG</code> בראש הקוד.</p>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                <input id="cfg-owner-email" type="email" placeholder="מייל שלך (name@example.com)" class="px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-sky-400/20 text-xs text-white focus:outline-none focus:border-sky-400" />
-                <input id="cfg-owner-whatsapp" type="text" placeholder="וואטסאפ (972501234567)" class="px-2.5 py-1.5 rounded-lg bg-slate-950/80 border border-sky-400/20 text-xs text-white focus:outline-none focus:border-sky-400" />
-              </div>
-              <button id="btn-save-owner-cfg" type="button" class="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-200 text-xs font-semibold transition">שמור הגדרות יעד</button>
-            </div>
-          </div>
+          <p class="text-[11px] text-sky-300/65 text-center">ההערה נשלחת ישירות לבעל הכלי ונשמרת גם אצלך בלשונית "הערות שנשמרו".</p>
         </div>
 
         <!-- Saved Feedback Log -->
@@ -466,12 +448,20 @@
   <div id="toast-banner" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl bg-slate-900/95 border border-cyan-400/50 text-cyan-100 text-xs sm:text-sm font-semibold shadow-2xl backdrop-blur-md fade-in"></div>
 
   <script>
-    // הגדרות בעל הכלי לקבלת הערות (ניתן למלא לפני העלאה לרשת)
+    // הגדרות בעל הכלי לקבלת הערות (מוגן מאחורי Formspree - המייל אינו חשוף בקוד)
     const OWNER_CONFIG = {
-      email: '',        // לדוגמה: 'yourname@gmail.com'
-      whatsapp: '',     // מספר בינלאומי ללא + או רווחים, לדוגמה: '972501234567'
-      formEndpoint: ''  // אופציונלי: כתובת Formspree לקבלת הערות ישירות ברקע
+      email: '',
+      whatsapp: '',
+      formEndpoint: 'https://formspree.io/f/mrpqyzlg'
     };
+
+    function trackEvent(path, title) {
+      try {
+        if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+          window.goatcounter.count({ path, title: title || path, event: true });
+        }
+      } catch (e) {}
+    }
 
     const FISH_DATA = [
       {
@@ -1009,9 +999,10 @@
     }
 
     // ==================== TAB NAVIGATION ====================
-    function switchTab(tab) {
+    function switchTab(tab, track = true) {
       clearQuizTimer();
       state.activeTab = tab;
+      if (track) trackEvent(`tab/${tab}`, `Tab: ${tab}`);
 
       const views = {
         quiz: document.getElementById('view-quiz'),
@@ -1298,6 +1289,7 @@
 
       const total = state.quizDeck.length;
       const acc = total > 0 ? Math.round((state.quizScore / total) * 100) : 0;
+      trackEvent('quiz/completed', `Quiz completed (${acc}%)`);
 
       document.getElementById('summary-score').textContent = `${state.quizScore}/${total}`;
       document.getElementById('summary-accuracy').textContent = `${acc}%`;
@@ -1561,8 +1553,11 @@
       document.getElementById('fb-type').value = fishId && fishId !== 'general' ? 'דיווח על טעות במידע' : 'הצעה לשיפור בכלי';
       document.getElementById('fb-message').value = '';
       document.getElementById('fb-error').classList.add('hidden');
-      document.getElementById('cfg-owner-email').value = state.ownerEmail || '';
-      document.getElementById('cfg-owner-whatsapp').value = state.ownerWhatsapp || '';
+      const sendBtn = document.getElementById('btn-fb-direct');
+      if (sendBtn) {
+        sendBtn.disabled = false;
+        document.getElementById('btn-fb-direct-label').textContent = 'שלח הערה';
+      }
       switchFeedbackTab('new');
       renderFeedbackLog();
       document.getElementById('feedback-modal').classList.remove('hidden');
@@ -1639,17 +1634,6 @@
         `הערה: ${message}`,
         sender ? `מאת: ${sender}` : ''
       ].filter(Boolean).join('\n');
-
-      // Optional background POST if OWNER_CONFIG.formEndpoint is set
-      if (OWNER_CONFIG.formEndpoint) {
-        try {
-          fetch(OWNER_CONFIG.formEndpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-            body: JSON.stringify(entry)
-          }).catch(() => {});
-        } catch (e) {}
-      }
 
       return { entry, formatted };
     }
@@ -1775,37 +1759,54 @@
       document.getElementById('fb-tab-new').addEventListener('click', () => switchFeedbackTab('new'));
       document.getElementById('fb-tab-log').addEventListener('click', () => switchFeedbackTab('log'));
 
-      document.getElementById('btn-toggle-owner-cfg').addEventListener('click', () => {
-        document.getElementById('owner-cfg-box').classList.toggle('hidden');
-      });
-      document.getElementById('btn-save-owner-cfg').addEventListener('click', () => {
-        state.ownerEmail = document.getElementById('cfg-owner-email').value.trim();
-        state.ownerWhatsapp = document.getElementById('cfg-owner-whatsapp').value.replace(/[^0-9]/g, '');
-        saveFeedbackStorage();
-        showToast('הגדרות יעד קבלת ההערות נשמרו!');
-      });
+      document.getElementById('btn-fb-direct').addEventListener('click', async () => {
+        const type = document.getElementById('fb-type').value;
+        const fishId = document.getElementById('fb-fish').value;
+        const message = document.getElementById('fb-message').value.trim();
+        const sender = document.getElementById('fb-sender').value.trim();
+        const errEl = document.getElementById('fb-error');
 
-      document.getElementById('btn-fb-whatsapp').addEventListener('click', () => {
-        const res = collectAndSaveFeedback();
-        if (!res) return;
-        const phone = (state.ownerWhatsapp || '').replace(/[^0-9]/g, '');
-        const url = phone
-          ? `https://wa.me/${phone}?text=${encodeURIComponent(res.formatted)}`
-          : `https://wa.me/?text=${encodeURIComponent(res.formatted)}`;
-        window.open(url, '_blank', 'noopener,noreferrer');
-        showToast('ההערה נשמרה ונפתחה לשליחה בוואטסאפ');
-        closeFeedbackModal();
-      });
+        if (!message) {
+          errEl.textContent = 'אנא כתוב הערה קצרה לפני השליחה.';
+          errEl.classList.remove('hidden');
+          return;
+        }
+        errEl.classList.add('hidden');
 
-      document.getElementById('btn-fb-email').addEventListener('click', () => {
-        const res = collectAndSaveFeedback();
-        if (!res) return;
-        const to = state.ownerEmail || '';
-        const subject = `משוב מחידון דגי הים התיכון – ${res.entry.fishLabel}`;
-        const mailUrl = `mailto:${encodeURIComponent(to)}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(res.formatted)}`;
-        window.open(mailUrl, '_blank');
-        showToast('ההערה נשמרה ונפתחה לשליחה במייל');
-        closeFeedbackModal();
+        const sendBtn = document.getElementById('btn-fb-direct');
+        const labelEl = document.getElementById('btn-fb-direct-label');
+        sendBtn.disabled = true;
+        labelEl.textContent = 'שולח...';
+
+        const fishObj = FISH_DATA.find(f => f.id === fishId);
+        const fishLabel = fishObj ? `${fishObj.hebrewName} (${fishObj.commonName})` : 'כללי';
+
+        try {
+          const response = await fetch(OWNER_CONFIG.formEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+            body: JSON.stringify({
+              _subject: `משוב מחידון דגי הים התיכון – ${fishLabel}`,
+              type,
+              fish: fishLabel,
+              message,
+              sender: sender || 'אנונימי'
+            })
+          });
+
+          if (!response.ok) throw new Error('Formspree error');
+
+          collectAndSaveFeedback();
+          trackEvent('feedback/sent', 'Feedback sent');
+          showToast('תודה! ההערה נשלחה בהצלחה לבעל הכלי.');
+          closeFeedbackModal();
+        } catch (err) {
+          errEl.textContent = 'לא ניתן היה לשלוח כרגע. נסה שוב בעוד רגע או לחץ על "העתק ושמור".';
+          errEl.classList.remove('hidden');
+        } finally {
+          sendBtn.disabled = false;
+          labelEl.textContent = 'שלח הערה';
+        }
       });
 
       document.getElementById('btn-fb-copy').addEventListener('click', () => {
@@ -1914,7 +1915,7 @@
 
       // Initial render
       startQuiz();
-      switchTab('quiz');
+      switchTab('quiz', false);
     }
 
     window.addEventListener('DOMContentLoaded', init);
