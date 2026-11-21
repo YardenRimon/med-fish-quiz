@@ -11,6 +11,14 @@
     :root {
       color-scheme: dark;
     }
+    html {
+      scrollbar-gutter: stable;
+    }
+    html.modal-open,
+    html.modal-open body {
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
     body {
       font-family: 'Heebo', 'Assistant', 'Rubik', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       background: radial-gradient(circle at top center, #0b2d48 0%, #061829 50%, #04101b 100%);
@@ -58,19 +66,28 @@
       from { opacity: 0; transform: translateY(6px); }
       to { opacity: 1; transform: translateY(0); }
     }
+    #quiz-feedback-bar, #quiz-active-container {
+      scroll-margin-top: 16px;
+    }
+    .header-hidden {
+      transform: translateY(-105%);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #app-header { transition: none !important; }
+    }
   </style>
 </head>
 <body class="antialiased selection:bg-sky-500/30 selection:text-sky-100">
   <!-- Top Header -->
-  <header class="sticky top-0 z-30 border-b border-sky-400/15 bg-[#051524]/90 backdrop-blur-md">
-    <div class="max-w-5xl mx-auto px-3 sm:px-5 py-3 flex flex-wrap items-center justify-between gap-3">
-      <div class="flex items-center gap-2.5">
-        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-900/50 shrink-0">
-          <i data-lucide="waves" class="w-5 h-5 text-slate-950"></i>
+  <header id="app-header" class="sticky top-0 z-30 border-b border-sky-400/15 bg-[#051524]/92 backdrop-blur-md transition-transform duration-300 ease-out will-change-transform">
+    <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2 sm:py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-900/50 shrink-0">
+          <i data-lucide="waves" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-950"></i>
         </div>
         <div>
-          <h1 class="text-base sm:text-lg font-bold tracking-tight text-white leading-tight">זיהוי דגי הים התיכון</h1>
-          <p class="text-[11px] sm:text-xs text-sky-300/80">אימון זיהוי מהיר לצוללן החופשי בישראל</p>
+          <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white leading-tight">זיהוי דגי הים התיכון</h1>
+          <p class="hidden sm:block text-xs text-sky-300/80">אימון זיהוי מהיר לצוללן החופשי בישראל</p>
         </div>
       </div>
 
@@ -99,6 +116,9 @@
         <button id="btn-open-feedback" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-100 flex items-center gap-1.5 transition" title="דווח על טעות או הצע שיפור">
           <i data-lucide="message-square-plus" class="w-3.5 h-3.5 text-cyan-300"></i>
           <span class="hidden sm:inline">הערה / דיווח</span>
+        </button>
+        <button id="btn-share-tab" type="button" class="p-1.5 rounded-lg text-sky-300/80 hover:text-white hover:bg-sky-500/15 transition" title="העתק קישור ישיר לטאב הנוכחי" aria-label="העתק קישור ישיר לטאב הנוכחי">
+          <i data-lucide="share-2" class="w-4 h-4"></i>
         </button>
         <button id="btn-open-reset" type="button" class="p-1.5 rounded-lg text-sky-300/70 hover:text-white hover:bg-sky-500/15 transition" title="איפוס התקדמות">
           <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
@@ -341,6 +361,14 @@
     </section>
   </main>
 
+  <!-- ==================== FLOATING NEXT FISH CTA ==================== -->
+  <div id="quiz-floating-next" class="hidden fixed bottom-4 inset-x-0 z-40 pointer-events-none flex justify-center px-4 fade-in">
+    <button id="btn-floating-next" type="button" class="pointer-events-auto shadow-2xl shadow-cyan-500/35 bg-gradient-to-l from-cyan-400 via-sky-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-slate-950 font-extrabold px-6 py-3 rounded-full text-sm sm:text-base flex items-center gap-2.5 border border-white/40 transition active:scale-95">
+      <span id="btn-floating-next-label">לדג הבא</span>
+      <i data-lucide="arrow-left" class="w-5 h-5"></i>
+    </button>
+  </div>
+
   <!-- ==================== FOOTER / LEGAL DISCLAIMER ==================== -->
   <footer class="border-t border-sky-400/15 bg-[#04111d]/80 mt-6">
     <div class="max-w-5xl mx-auto px-4 sm:px-5 py-6 text-xs text-sky-300/70 space-y-2.5 leading-relaxed">
@@ -359,26 +387,32 @@
       </p>
       <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-sky-400/10 text-[11px] text-sky-300/50">
         <span>פרטיות: סטטיסטיקת שימוש אנונימית בסיסית ללא עוגיות (Cookies). פרטי יצירת קשר משמשים למענה ולשיפור הכלי בלבד.</span>
-        <span class="font-mono text-sky-300/70 shrink-0" dir="ltr">v2.2 • Deployed 21.11.2026</span>
+        <span class="font-mono text-sky-300/70 shrink-0" dir="ltr">v2.3 • Deployed 21.11.2026</span>
       </div>
     </div>
   </footer>
 
   <!-- ==================== DETAIL MODAL ==================== -->
-  <div id="fish-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-    <div class="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl fade-in">
-      <div class="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-[#091f33]/95 border-b border-sky-400/15">
-        <span id="modal-title" class="text-base font-bold text-white"></span>
-        <button id="btn-close-modal" type="button" class="p-1.5 rounded-lg text-sky-300 hover:text-white hover:bg-sky-500/20 transition" aria-label="סגור">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <div id="fish-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm overscroll-contain flex items-center justify-center p-3 sm:p-5">
+    <div class="glass-card rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl fade-in">
+      <div class="shrink-0 flex items-center justify-between gap-2 px-4 py-3 bg-[#091f33] border-b border-sky-400/15">
+        <span id="modal-title" class="text-base font-bold text-white truncate"></span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="btn-share-fish" type="button" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/25 text-sky-200 hover:text-white transition" title="העתק קישור ישיר לדג">
+            <i data-lucide="link" class="w-3.5 h-3.5 text-cyan-300"></i>
+            <span class="hidden sm:inline">העתק קישור</span>
+          </button>
+          <button id="btn-close-modal" type="button" class="p-1.5 rounded-lg text-sky-300 hover:text-white hover:bg-sky-500/20 transition" aria-label="סגור">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
       </div>
-      <div id="modal-body" class="p-4 sm:p-5 space-y-4"></div>
+      <div id="modal-body" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4"></div>
     </div>
   </div>
 
   <!-- ==================== GALLERY LIGHTBOX MODAL ==================== -->
-  <div id="lightbox-modal" class="hidden fixed inset-0 z-[60] bg-slate-950/92 backdrop-blur-md flex items-center justify-center p-3 sm:p-6">
+  <div id="lightbox-modal" role="dialog" aria-modal="true" aria-labelledby="lb-title" class="hidden fixed inset-0 z-[60] bg-slate-950/92 backdrop-blur-md overscroll-contain flex items-center justify-center p-3 sm:p-6">
     <div class="relative max-w-4xl w-full flex flex-col items-center gap-3 fade-in">
       <div class="w-full flex items-center justify-between text-white">
         <div class="flex items-center gap-2 min-w-0">
@@ -414,7 +448,7 @@
   </div>
 
   <!-- ==================== RESET CONFIRMATION MODAL ==================== -->
-  <div id="reset-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div id="reset-modal" role="dialog" aria-modal="true" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm overscroll-contain flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl fade-in">
       <div class="flex items-center gap-2 text-white font-bold text-base">
         <i data-lucide="rotate-ccw" class="w-5 h-5 text-amber-400"></i>
@@ -429,9 +463,9 @@
   </div>
 
   <!-- ==================== FEEDBACK / REPORT MODAL ==================== -->
-  <div id="feedback-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5">
-    <div class="glass-card rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl fade-in">
-      <div class="sticky top-0 z-10 flex items-center justify-between px-4 py-3 bg-[#091f33]/95 border-b border-sky-400/15">
+  <div id="feedback-modal" role="dialog" aria-modal="true" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm overscroll-contain flex items-center justify-center p-3 sm:p-5">
+    <div class="glass-card rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col overflow-hidden shadow-2xl fade-in">
+      <div class="shrink-0 flex items-center justify-between px-4 py-3 bg-[#091f33] border-b border-sky-400/15">
         <div class="flex items-center gap-2 text-white font-bold text-base">
           <i data-lucide="message-square-plus" class="w-5 h-5 text-cyan-400"></i>
           <span>שליחת הערה / דיווח לבעל הכלי</span>
@@ -441,7 +475,7 @@
         </button>
       </div>
 
-      <div class="p-4 sm:p-5 space-y-4">
+      <div id="feedback-modal-body" class="flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5 space-y-4">
         <!-- Direct Feedback Form -->
         <div id="fb-panel-new" class="space-y-3.5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -1092,7 +1126,7 @@
         prestige: "עממי–איכותי ★ 3.5/5",
         culinary: "בשר לבן, עדין ומתקתק מאוד. נהדר שלם על הגריל, בטיגון פריך במחבת או באפייה קצרה בתנור.",
         hebrewName: "שישן מסורטט",
-        commonName: "מרמיר",
+        commonName: "מרמיר / מרמור",
         scientificName: "Lithognathus mormyrus",
         image: 'images/hero/marmir.jpg',
         gallery: [{"src": "images/gallery/marmir_1.jpg", "credit": "Falk Viczian Solarboot-Projekte gGmbH (CC-BY-NC)", "place": "Ionian Islands, Peloponnese, Western Greece and the Ionian Islands, Greece", "url": "https://www.inaturalist.org/observations/254432439"}, {"src": "images/gallery/marmir_2.jpg", "credit": "Αθανασία Κοτσώνας (CC-BY-NC)", "place": "Itea Beach, Greece", "url": "https://www.inaturalist.org/observations/305474251"}, {"src": "images/gallery/marmir_3.jpg", "credit": "Christopher Hampson (CC-BY-NC)", "place": "Baška Voda, Croatia", "url": "https://www.inaturalist.org/observations/16150344"}],
@@ -1102,8 +1136,8 @@
         statusLabel: "מותר בדיג – מינימום 11 ס״מ",
         minLength: "11 ס״מ ומעלה",
         habitat: "קרקעיות חוליות רדודות וגבולות חול-סלע; מחפש מזון בחול בלהקות קטנות.",
-        idMarkers: ["גוף מוארך וכסוף עם 10–14 פסי רוחב אנכיים דקים וכהים (\"פיג׳מה\").", "חרטום ארוך ומחודד במיוחד המותאם לחיטוט בחול.", "ללא כתם שחור בבסיס הזנב (בניגוד לסרגוס!)."],
-        lookalike: "נבדל בקלות מסרגוס בזכות החרטום המחודד והארוך, ריבוי הפסים הדקים והיעדר כתם שחור בבסיס הזנב.",
+        idMarkers: ["גוף מוארך וכסוף עם 12–14 פסי רוחב אנכיים דקים וכהים המתחלפים באורכם (ארוך-קצר לסירוגין).", "חרטום ארוך ומחודד עם פה תחתון (שפתיים עבות) ועין קטנה הממוקמת גבוה בראש.", "ללא כתם שחור בבסיס הזנב (בניגוד לסרגוס ולאספור!)."],
+        lookalike: "נבדל בקלות מסרגוס ומאספור (סרגוס חד-אף) בזכות הגוף המוארך והנמוך, העין הגבוהה בראש, הפסים הדקים המתחלפים (ארוך-קצר) והיעדר כתם שחור בבסיס הזנב.",
         sourceUrl: "https://www.parks.org.il/article/fish-length/",
         sourceLabel: "טבלת אורכי המינימום – רשות הטבע והגנים",
         distractors: ["sargus", "sargus_had_af", "denis"]
@@ -1114,7 +1148,7 @@
         prestige: "עממי–איכותי ★ 3.5/5",
         culinary: "טעם דומה לסרגוס המסורטט – בשר לבן ועדין. מצוין שלם על גריל פחמים או בטיגון קריספי.",
         hebrewName: "סרגוס חד-אף",
-        commonName: "סרגוס מחודד / פונטצו",
+        commonName: "אספור / עספור / פונטצו",
         scientificName: "Diplodus puntazzo",
         image: 'images/hero/sargus_had_af.jpg',
         gallery: [{"src": "images/gallery/sargus_had_af_1.jpg", "credit": "saraorca (CC-BY-NC)", "place": "Haifa, Israel", "url": "https://www.inaturalist.org/observations/329795706"}, {"src": "images/gallery/sargus_had_af_2.jpg", "credit": "Falk Viczian Solarboot-Projekte gGmbH (CC-BY-NC)", "place": "Epirus, Epirus and Western Macedonia, Greece", "url": "https://www.inaturalist.org/observations/259876353"}, {"src": "images/gallery/sargus_had_af_3.jpg", "credit": "Nicolas LATOUR (CC-BY-NC)", "place": "Bouches-du-Rhône, Provence-Alpes-Côte d'Azur, FR", "url": "https://www.inaturalist.org/observations/393732616"}],
@@ -1124,7 +1158,7 @@
         statusLabel: "מותר בדיג – מינימום 11 ס״מ",
         minLength: "11 ס״מ ומעלה (ספורטיבית מומלץ לקחת רק פרטים גדולים)",
         habitat: "שוניות סלעיות, מערות ושוברי גלים – לרוב באותם אזורים כמו הסרגוס המסורטט.",
-        idMarkers: ["חרטום בולט, צר ומחודד קדימה (\"אף מחודד\") – סימן הזיהוי העיקרי מול סרגוס רגיל.", "גוף כסוף עם 7–9 פסי רוחב כהים וברורים יותר מאשר בסרגוס המסורטט.", "טבעת/כתם שחור רחב בבסיס הזנב המקיף כמעט את כל שורש הזנב."],
+        idMarkers: ["גוף גבוה ואובלי עם שקע קל במצח וחרטום בולט, צר ומחודד קדימה כמקור ציפור (ומכאן שמו בערבית: ׳אספור׳ – ציפור).", "גוף כסוף עם 9–11 פסי רוחב כהים, דקים וברורים לאורך כל צידי הגוף.", "טבעת/אוכף שחור רחב ובולט בבסיס הזנב המקיף כמעט את כל שורש הזנב, ושוליים אחוריים כהים בסנפיר הזנב."],
         lookalike: "אל תבלבל עם חדאד/זברה (סרגוס הפסים, Diplodus cervinus) שלו 4–5 פסי רוחב עבים ושחורים במיוחד, ולא עם סרגוס מסורטט שלו חרטום עגול יותר. שימו לב: הכינוי ׳שפיץ׳ בישראל מתייחס בכלל לבומחיט (Hemiramphus far).",
         sourceUrl: "https://www.parks.org.il/article/fish-length/",
         sourceLabel: "טבלת אורכי המינימום – רשות הטבע והגנים",
@@ -1207,6 +1241,90 @@
         sourceUrl: "https://www.parks.org.il/article/fish-length/",
         sourceLabel: "טבלת אורכי המינימום – רשות הטבע והגנים",
         distractors: ["shinan", "denis", "sargus"]
+      },
+      {
+        id: "dorado",
+        abundance: "עונתי (סוף קיץ–סתיו, מים פתוחים)",
+        prestige: "יוקרתי מאוד ★ 5/5",
+        culinary: "בשר לבן, מוצק ועדין במיוחד (מאהי-מאהי). מצוין על הגריל, בצריבה במחבת, סביצ׳ה וטאקוס דג.",
+        hebrewName: "רעמתן כחול",
+        commonName: "דוראדו / מאהי-מאהי",
+        scientificName: "Coryphaena hippurus",
+        image: 'images/hero/dorado.jpg',
+        imageCredit: "Luis P. B. (CC-BY-NC)",
+        imageUrl: "https://www.inaturalist.org/observations/204280326",
+        gallery: [{"src": "images/gallery/dorado_4.jpg", "credit": "Luis P. B. (CC-BY-NC)", "place": "Off Bahía de Magdalena, Baja California Sur, México", "url": "https://www.inaturalist.org/observations/204280326"}, {"src": "images/gallery/dorado_3.jpg", "credit": "Marek Koszorek (CC-BY-NC)", "place": "Greece", "url": "https://www.inaturalist.org/observations/121783641"}, {"src": "images/gallery/dorado_2.jpg", "credit": "jjulio2000 (CC-BY-NC)", "place": "Centro, Torrevieja, Alicante, España", "url": "https://www.inaturalist.org/observations/185144008"}],
+        category: "targets",
+        isGrouper: false,
+        status: "legal",
+        statusLabel: "מותר בדיג – מינימום 30 ס״מ",
+        minLength: "30 ס״מ ומעלה",
+        habitat: "מים פתוחים וכחולים, לרוב בסמוך לעצמים צפים (מצופים, חבלים, שברי עץ) ובשולי ריפים עמוקים באוגוסט–נובמבר.",
+        idMarkers: [
+          "צבעים עזים ובלתי ניתנים לטעות: גב כחול-טורקיז מטאלי, צדדים ירוקים-זהובים בוהקים ובטן צהובה.",
+          "סנפיר גב ארוך ורציף הנמשך מראש הדג ועד כמעט הזנב (כמו ׳רעמה׳).",
+          "מצח תלול וגבוה (מרובע במיוחד אצל זכרים בוגרים) וזנב ממוזלג עמוק בצבע צהוב-זהוב."
+        ],
+        lookalike: "כמעט בלתי אפשרי לבלבל אותו במים בזכות השילוב של הצבעים הזרחניים, סנפיר הגב הארוך והמצח התלול.",
+        sourceUrl: "https://www.parks.org.il/article/fish-length/",
+        sourceLabel: "טבלת אורכי המינימום – רשות הטבע והגנים",
+        distractors: ["intias", "tunit", "palamida"]
+      },
+      {
+        id: "sarda",
+        abundance: "עונתי (אביב וסתיו, מים פתוחים)",
+        prestige: "טורף מבוקש ★ 4/5",
+        culinary: "בשר עשיר וטעים יותר משל הטונית (בהיר מעט יותר). מומלץ לדמם מיד; מעולה כסשימי/טאטאקי, כבוש בשמן זית או על הגריל.",
+        hebrewName: "פלמידה אטלנטית",
+        commonName: "סרדה / בוניטו",
+        scientificName: "Sarda sarda",
+        image: 'images/hero/sarda.jpg',
+        imageCredit: "Tony Gilbert (CC-BY-NC)",
+        imageUrl: "https://www.inaturalist.org/observations/320713063",
+        gallery: [{"src": "images/gallery/sarda_real_4.jpg", "credit": "Tony Gilbert (CC-BY-NC)", "place": "35510 Tías, Las Palmas, Spain", "url": "https://www.inaturalist.org/observations/320713063"}, {"src": "images/gallery/sarda_real_3.jpg", "credit": "Michael Bommerer (CC-BY)", "place": "Spain", "url": "https://www.inaturalist.org/observations/197248279"}],
+        category: "targets",
+        isGrouper: false,
+        status: "legal",
+        statusLabel: "מותר בדיג – מינימום 25 ס״מ",
+        minLength: "25 ס״מ ומעלה",
+        habitat: "מים פתוחים, שולי ריפים עמוקים ומרדפים מהירים בלהקות אחר להקות סרדינים בעונות המעבר.",
+        idMarkers: [
+          "7–11 פסים כהים אלכסוניים ברורים היורדים באלכסון לאורך הגב והצד העליון.",
+          "ללא נקודות שחורות מתחת לסנפיר החזה (הבדל מרכזי מול טונית אטלנטית!).",
+          "גוף טורפדו כסוף-כחלחל עם פה גדול ושיניים חדות קטנות וזנב סהרוני מהיר."
+        ],
+        lookalike: "נבדלת מטונית אטלנטית (פלמידה שחורה) בפסים האלכסוניים הישרים על הגב ובהיעדר הנקודות השחורות מתחת לסנפיר החזה; נבדלת מסקומברן זריז (פלמידה לבנה) בגוף קצר ועגלגל יותר ובפסים אלכסוניים ולא אנכיים.",
+        sourceUrl: "https://www.parks.org.il/article/fish-length/",
+        sourceLabel: "טבלת אורכי המינימום – רשות הטבע והגנים",
+        distractors: ["tunit", "palamida", "trulus"]
+      },
+      {
+        id: "bumhit",
+        abundance: "נפוץ (פני המים בקרבת חופים וריפים)",
+        prestige: "עממי ★ 2.5/5",
+        culinary: "דג עדין וטעים מאוד בטיגון שלם קריספי (לאחר ניקוי) או כפיתיון איכותי לטורפים גדולים.",
+        hebrewName: "בומחיט",
+        commonName: "שפיץ / חצי-מקור",
+        scientificName: "Hemiramphus far",
+        image: 'images/hero/bumhit.jpg',
+        imageCredit: "billyrolls (CC-BY-NC)",
+        imageUrl: "https://www.inaturalist.org/observations/189781366",
+        gallery: [{"src": "images/gallery/bumhit_2.jpg", "credit": "billyrolls (CC-BY-NC)", "place": "Marsa Alam, Red Sea Governorate, Egypt", "url": "https://www.inaturalist.org/observations/189781366"}, {"src": "images/gallery/bumhit_4.jpg", "credit": "Glen Whisson (CC-BY-NC)", "place": "Exmouth, WA, Australia", "url": "https://www.inaturalist.org/observations/79650997"}],
+        category: "targets",
+        isGrouper: false,
+        status: "legal",
+        statusLabel: "מותר בדיג – מהגר מים סוף",
+        minLength: "אין הגבלת אורך מינימום (מין מהגר לסיפסי מים סוף)",
+        habitat: "שוחה בלהקות ממש מתחת לפני המים, מעל ריפים רדודים, מפרצים ושוברי גלים.",
+        idMarkers: [
+          "לסת תחתונה ארוכה מאוד, ישרה ומחודדת כמו מחט עם קצה אדום-כתום (ה׳שפיץ׳) ולסת עליונה קצרה בהרבה.",
+          "גוף צר, ארוך וכסוף-כחלחל עם 4–9 כתמים/פסים שחורים קצרים ומרווחים לאורך הצד.",
+          "אונת הזנב התחתונה ארוכה יותר מהעליונה (העליונה צהובה-ירקרקה והתחתונה כחלחלה)."
+        ],
+        lookalike: "בישראל הכינוי ׳שפיץ׳ מתייחס לבומחיט (ולא לסרגוס חד-אף!). נבדל מחנית (Belone) בכך שרק הלסת התחתונה ארוכה ולא שתי הלסתות יחד.",
+        sourceUrl: "https://www.parks.org.il/article/fish-length/",
+        sourceLabel: "רשות הטבע והגנים – מדריך דגי הים התיכון",
+        distractors: ["barracuda", "buri", "sargus_had_af"]
       }
     ];
 
@@ -1215,6 +1333,7 @@
 
     const state = {
       activeTab: 'quiz',
+      activeModalFishId: null,
       mastery: {}, // { [id]: 'mastered' | 'review' }
       // Quiz state
       quizFilter: 'all',
@@ -1474,11 +1593,76 @@
       `;
     }
 
+    // ==================== URL ROUTING & DEEP LINKING ====================
+    const VALID_TABS = ['quiz', 'flashcards', 'guide'];
+
+    function parseRouteFromLocation() {
+      let tab = null;
+      let fishId = null;
+
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const qTab = params.get('tab');
+        const qFish = params.get('fish');
+        if (qTab && VALID_TABS.includes(qTab)) tab = qTab;
+        if (qFish) fishId = qFish.trim();
+
+        if (!tab && !fishId && window.location.hash) {
+          const rawHash = window.location.hash.replace(/^#\/?/, '').trim();
+          if (VALID_TABS.includes(rawHash)) {
+            tab = rawHash;
+          } else if (rawHash.includes('=')) {
+            const hashParams = new URLSearchParams(rawHash);
+            const hTab = hashParams.get('tab');
+            const hFish = hashParams.get('fish');
+            if (hTab && VALID_TABS.includes(hTab)) tab = hTab;
+            if (hFish) fishId = hFish.trim();
+          } else if (FISH_DATA.some(f => f.id === rawHash)) {
+            fishId = rawHash;
+          }
+        }
+      } catch (e) {}
+
+      if (fishId && !tab) {
+        tab = 'guide';
+      }
+      return { tab: tab || 'quiz', fishId };
+    }
+
+    function buildShareUrl(tab = state.activeTab, fishId = null, alwaysIncludeTab = false) {
+      try {
+        const url = new URL(window.location.href);
+        url.hash = '';
+        if (tab && (alwaysIncludeTab || tab !== 'quiz')) {
+          url.searchParams.set('tab', tab);
+        } else {
+          url.searchParams.delete('tab');
+        }
+        if (fishId) {
+          url.searchParams.set('fish', fishId);
+        } else {
+          url.searchParams.delete('fish');
+        }
+        return url.toString();
+      } catch (e) {
+        return window.location.href;
+      }
+    }
+
+    function syncUrlState() {
+      try {
+        const targetUrl = buildShareUrl(state.activeTab, state.activeModalFishId, false);
+        if (window.location.href !== targetUrl) {
+          window.history.replaceState(null, '', targetUrl);
+        }
+      } catch (e) {}
+    }
+
     // ==================== TAB NAVIGATION ====================
-    function switchTab(tab, track = true) {
+    function switchTab(tab, track = true, updateUrl = true) {
       clearQuizTimer();
-      state.activeTab = tab;
-      if (track) trackEvent(`tab/${tab}`, `Tab: ${tab}`);
+      state.activeTab = VALID_TABS.includes(tab) ? tab : 'quiz';
+      if (track) trackEvent(`tab/${state.activeTab}`, `Tab: ${state.activeTab}`);
 
       const views = {
         quiz: document.getElementById('view-quiz'),
@@ -1492,24 +1676,61 @@
       };
 
       Object.keys(views).forEach(key => {
-        const active = key === tab;
+        const active = key === state.activeTab;
         views[key].classList.toggle('hidden', !active);
         tabs[key].className = active
           ? 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition bg-sky-500 text-slate-950 shadow'
           : 'nav-tab px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold flex items-center gap-1.5 transition text-sky-200/80 hover:text-white hover:bg-sky-500/15';
       });
 
-      if (tab === 'quiz') {
+      if (state.activeTab === 'quiz') {
+        const showFloating = state.quizAnswered && state.quizIndex < state.quizDeck.length;
+        document.getElementById('quiz-floating-next').classList.toggle('hidden', !showFloating);
         if (!state.quizAnswered && state.quizIndex < state.quizDeck.length && state.speedMode) {
           startQuizTimer();
         }
-      } else if (tab === 'flashcards') {
-        buildFlashcardDeck(false);
-        renderFlashcard();
-      } else if (tab === 'guide') {
-        renderGuide();
+      } else {
+        document.getElementById('quiz-floating-next').classList.add('hidden');
+        if (state.activeTab === 'flashcards') {
+          buildFlashcardDeck(false);
+          renderFlashcard();
+        } else if (state.activeTab === 'guide') {
+          renderGuide();
+        }
       }
+      if (updateUrl) syncUrlState();
       refreshIcons();
+    }
+
+    function updateFilterCounts() {
+      const allN = FISH_DATA.length;
+      const targetsN = FISH_DATA.filter(f => f.category === 'targets').length;
+      const dangerN = FISH_DATA.filter(f => f.category === 'danger').length;
+      const groupersN = FISH_DATA.filter(f => f.isGrouper || f.status === 'protected').length;
+      const labels = {
+        all: `הכל (${allN})`,
+        targets: `דגי מטרה (${targetsN})`,
+        danger: `ארסיים ומסוכנים (${dangerN})`,
+        groupers: `דקרים ומוגנים (${groupersN})`,
+      };
+      document.querySelectorAll('.qfilter-btn').forEach(btn => {
+        if (labels[btn.dataset.qfilter]) btn.textContent = labels[btn.dataset.qfilter];
+      });
+    }
+
+    function goToNextQuizQuestion() {
+      state.quizIndex += 1;
+      renderQuizQuestion();
+      const hdr = document.getElementById('app-header');
+      if (hdr) hdr.classList.remove('header-hidden');
+      requestAnimationFrame(() => {
+        const target = document.getElementById('quiz-active-container');
+        if (target && !target.classList.contains('hidden')) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        } else {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+      });
     }
 
     // ==================== QUIZ LOGIC ====================
@@ -1604,6 +1825,7 @@
       document.getElementById('quiz-hint-text').textContent = '';
 
       document.getElementById('quiz-feedback-bar').classList.add('hidden');
+      document.getElementById('quiz-floating-next').classList.add('hidden');
       document.getElementById('quiz-info-card').classList.add('hidden');
       document.getElementById('quiz-info-card').innerHTML = '';
 
@@ -1731,13 +1953,21 @@
         fbMsg.innerHTML = `<i data-lucide="x-circle" class="w-5 h-5 text-rose-400 shrink-0"></i><span class="text-rose-200">לא מדויק – זהו ${fish.hebrewName}</span>`;
       }
 
-      const nextLabel = document.getElementById('btn-quiz-next-label');
-      nextLabel.textContent = state.quizIndex + 1 >= state.quizDeck.length ? 'צפה בסיכום' : 'לדג הבא';
+      const nextText = state.quizIndex + 1 >= state.quizDeck.length ? 'צפה בסיכום' : 'לדג הבא';
+      document.getElementById('btn-quiz-next-label').textContent = nextText;
+      document.getElementById('btn-floating-next-label').textContent = nextText;
+      document.getElementById('quiz-floating-next').classList.remove('hidden');
 
       // Info card
       const infoCard = document.getElementById('quiz-info-card');
       infoCard.innerHTML = buildFishDetailsHTML(fish, true);
       infoCard.classList.remove('hidden');
+
+      // Smooth auto-scroll to result & fish info card
+      setTimeout(() => {
+        const fbEl = document.getElementById('quiz-feedback-bar');
+        if (fbEl) fbEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 90);
 
       const masterToggleBtn = infoCard.querySelector('[data-toggle-master]');
       if (masterToggleBtn) {
@@ -1759,6 +1989,7 @@
 
     function renderQuizSummary() {
       clearQuizTimer();
+      document.getElementById('quiz-floating-next').classList.add('hidden');
       document.getElementById('quiz-active-container').classList.add('hidden');
       const summary = document.getElementById('quiz-summary');
       summary.classList.remove('hidden');
@@ -1967,20 +2198,45 @@
     }
 
     // ==================== MODALS ====================
+    const MODAL_IDS = ['fish-modal', 'lightbox-modal', 'reset-modal', 'feedback-modal'];
+
+    function syncBodyScrollLock() {
+      const anyOpen = MODAL_IDS.some(id => !document.getElementById(id).classList.contains('hidden'));
+      document.documentElement.classList.toggle('modal-open', anyOpen);
+    }
+
     function openFishModal(fish) {
+      state.activeModalFishId = fish.id;
       document.getElementById('modal-title').textContent = `${fish.hebrewName} (${fish.commonName})`;
-      document.getElementById('modal-body').innerHTML = `
+      const modalBody = document.getElementById('modal-body');
+      modalBody.innerHTML = `
         <div class="fish-img-wrap rounded-xl overflow-hidden border border-sky-400/20">
           <img src="${fish.image}" alt="${fish.hebrewName}" />
         </div>
         ${buildFishDetailsHTML(fish, false)}
       `;
       document.getElementById('fish-modal').classList.remove('hidden');
+      modalBody.scrollTop = 0;
+      syncBodyScrollLock();
+      syncUrlState();
       refreshIcons();
     }
 
     function closeFishModal() {
+      state.activeModalFishId = null;
       document.getElementById('fish-modal').classList.add('hidden');
+      syncBodyScrollLock();
+      syncUrlState();
+    }
+
+    function openResetModal() {
+      document.getElementById('reset-modal').classList.remove('hidden');
+      syncBodyScrollLock();
+    }
+
+    function closeResetModal() {
+      document.getElementById('reset-modal').classList.add('hidden');
+      syncBodyScrollLock();
     }
 
     // ==================== GALLERY LIGHTBOX ====================
@@ -2018,10 +2274,12 @@
       lightboxState.idx = Math.max(0, Math.min(idx, fish.gallery.length - 1));
       renderLightbox();
       document.getElementById('lightbox-modal').classList.remove('hidden');
+      syncBodyScrollLock();
     }
 
     function closeLightbox() {
       document.getElementById('lightbox-modal').classList.add('hidden');
+      syncBodyScrollLock();
     }
 
     function stepLightbox(delta) {
@@ -2090,17 +2348,38 @@
         document.getElementById('btn-fb-direct-label').textContent = 'שלח הערה';
       }
       document.getElementById('feedback-modal').classList.remove('hidden');
+      const fbBody = document.getElementById('feedback-modal-body');
+      if (fbBody) fbBody.scrollTop = 0;
+      syncBodyScrollLock();
       refreshIcons();
     }
 
     function closeFeedbackModal() {
       document.getElementById('feedback-modal').classList.add('hidden');
+      syncBodyScrollLock();
     }
 
     // ==================== EVENT WIRING ====================
     function init() {
       loadProgress();
       updateMasteryCounter();
+      updateFilterCounts();
+
+      // Smart auto-hide header on scroll down, reveal on scroll up
+      let lastScrollY = window.scrollY;
+      const appHeader = document.getElementById('app-header');
+      window.addEventListener('scroll', () => {
+        const currentY = window.scrollY;
+        const delta = currentY - lastScrollY;
+        if (currentY < 56) {
+          appHeader.classList.remove('header-hidden');
+        } else if (delta > 8 && currentY > 88) {
+          appHeader.classList.add('header-hidden');
+        } else if (delta < -6) {
+          appHeader.classList.remove('header-hidden');
+        }
+        lastScrollY = currentY;
+      }, { passive: true });
 
       // Tabs
       document.getElementById('tab-quiz').addEventListener('click', () => switchTab('quiz'));
@@ -2122,10 +2401,8 @@
 
       document.getElementById('btn-quiz-restart').addEventListener('click', () => startQuiz());
 
-      document.getElementById('btn-quiz-next').addEventListener('click', () => {
-        state.quizIndex += 1;
-        renderQuizQuestion();
-      });
+      document.getElementById('btn-quiz-next').addEventListener('click', goToNextQuizQuestion);
+      document.getElementById('btn-floating-next').addEventListener('click', goToNextQuizQuestion);
 
       document.getElementById('btn-new-round').addEventListener('click', () => startQuiz());
       document.getElementById('btn-retry-missed').addEventListener('click', () => {
@@ -2283,7 +2560,20 @@
         }
       });
 
-      // Modals
+      // Modals & Share links
+      document.getElementById('btn-share-tab').addEventListener('click', () => {
+        const shareUrl = buildShareUrl(state.activeTab, state.activeModalFishId, true);
+        copyTextSafe(shareUrl).then(() => {
+          showToast(state.activeModalFishId ? 'הקישור הישיר לדג הועתק ללוח!' : 'הקישור הישיר לטאב הועתק ללוח!');
+        });
+      });
+      document.getElementById('btn-share-fish').addEventListener('click', () => {
+        if (!state.activeModalFishId) return;
+        const shareUrl = buildShareUrl('guide', state.activeModalFishId, true);
+        copyTextSafe(shareUrl).then(() => {
+          showToast('הקישור הישיר לדג הועתק ללוח!');
+        });
+      });
       document.getElementById('btn-close-modal').addEventListener('click', closeFishModal);
       document.getElementById('fish-modal').addEventListener('click', (e) => {
         if (e.target.id === 'fish-modal') closeFishModal();
@@ -2303,20 +2593,16 @@
         openLightbox(btn.dataset.galleryFish, parseInt(btn.dataset.galleryIdx || '0', 10));
       });
 
-      document.getElementById('btn-open-reset').addEventListener('click', () => {
-        document.getElementById('reset-modal').classList.remove('hidden');
-      });
-      document.getElementById('btn-cancel-reset').addEventListener('click', () => {
-        document.getElementById('reset-modal').classList.add('hidden');
-      });
+      document.getElementById('btn-open-reset').addEventListener('click', openResetModal);
+      document.getElementById('btn-cancel-reset').addEventListener('click', closeResetModal);
       document.getElementById('reset-modal').addEventListener('click', (e) => {
-        if (e.target.id === 'reset-modal') document.getElementById('reset-modal').classList.add('hidden');
+        if (e.target.id === 'reset-modal') closeResetModal();
       });
       document.getElementById('btn-confirm-reset').addEventListener('click', () => {
         state.mastery = {};
         saveProgress();
         updateMasteryCounter();
-        document.getElementById('reset-modal').classList.add('hidden');
+        closeResetModal();
         startQuiz();
         buildFlashcardDeck(false);
         if (state.activeTab === 'flashcards') renderFlashcard();
@@ -2337,7 +2623,7 @@
         const fbModalOpen = !document.getElementById('feedback-modal').classList.contains('hidden');
         if (e.key === 'Escape') {
           if (fishModalOpen) closeFishModal();
-          if (resetModalOpen) document.getElementById('reset-modal').classList.add('hidden');
+          if (resetModalOpen) closeResetModal();
           if (fbModalOpen) closeFeedbackModal();
           return;
         }
@@ -2349,8 +2635,7 @@
             if (state.currentOptions[idx]) handleQuizAnswer(state.currentOptions[idx].id);
           } else if (state.quizAnswered && (e.key === 'Enter' || e.key === ' ')) {
             e.preventDefault();
-            state.quizIndex += 1;
-            renderQuizQuestion();
+            goToNextQuizQuestion();
           }
         } else if (state.activeTab === 'flashcards' && state.fcDeck.length) {
           if (e.key === ' ') {
@@ -2371,9 +2656,27 @@
         }
       });
 
-      // Initial render
+      window.addEventListener('hashchange', () => {
+        const route = parseRouteFromLocation();
+        switchTab(route.tab, false, !route.fishId);
+        if (route.fishId) {
+          const targetFish = FISH_DATA.find(f => f.id === route.fishId);
+          if (targetFish) openFishModal(targetFish);
+        }
+      });
+
+      // Initial render (respecting direct links to tab / fish)
+      const initialRoute = parseRouteFromLocation();
       startQuiz();
-      switchTab('quiz', false);
+      switchTab(initialRoute.tab, false, !initialRoute.fishId);
+      if (initialRoute.fishId) {
+        const targetFish = FISH_DATA.find(f => f.id === initialRoute.fishId);
+        if (targetFish) {
+          openFishModal(targetFish);
+        } else {
+          syncUrlState();
+        }
+      }
     }
 
     window.addEventListener('DOMContentLoaded', init);
