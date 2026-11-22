@@ -289,6 +289,19 @@
 
           <!-- Back -->
           <div id="fc-back" class="hidden p-5 sm:p-6 space-y-4 fade-in">
+            <div class="pb-3 border-b border-sky-400/15 flex flex-wrap items-center justify-between gap-2">
+              <button type="button" data-fc-flip-back class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-sky-400/25 text-sky-200 transition">חזור לתמונה</button>
+              <div class="flex items-center gap-2">
+                <button type="button" data-fc-review class="px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-500/20 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 flex items-center gap-1.5 transition">
+                  <i data-lucide="rotate-cw" class="w-3.5 h-3.5"></i>
+                  <span>לעוד חזרה</span>
+                </button>
+                <button type="button" data-fc-master class="px-3.5 py-2 rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-950 flex items-center gap-1.5 transition">
+                  <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                  <span>זיהיתי מיד</span>
+                </button>
+              </div>
+            </div>
             <div id="fc-back-content"></div>
             <div class="pt-3 border-t border-sky-400/15 flex flex-wrap items-center justify-between gap-2">
               <button id="btn-fc-flip-back" type="button" class="px-3 py-1.5 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 border border-sky-400/25 text-sky-200 transition">חזור לתמונה</button>
@@ -2445,10 +2458,12 @@
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-flip-back').addEventListener('click', (e) => {
-        e.stopPropagation();
-        state.fcFlipped = false;
-        renderFlashcard();
+      document.querySelectorAll('#btn-fc-flip-back, [data-fc-flip-back]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          state.fcFlipped = false;
+          renderFlashcard();
+        });
       });
 
       document.getElementById('btn-fc-hint').addEventListener('click', (e) => {
@@ -2457,13 +2472,17 @@
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-master').addEventListener('click', (e) => {
-        e.stopPropagation();
-        rateFlashcard('mastered');
+      document.querySelectorAll('#btn-fc-master, [data-fc-master]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          rateFlashcard('mastered');
+        });
       });
-      document.getElementById('btn-fc-review').addEventListener('click', (e) => {
-        e.stopPropagation();
-        rateFlashcard('review');
+      document.querySelectorAll('#btn-fc-review, [data-fc-review]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          rateFlashcard('review');
+        });
       });
 
       document.getElementById('btn-fc-prev').addEventListener('click', () => {
