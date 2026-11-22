@@ -2115,13 +2115,19 @@
       saveProgress();
       updateMasteryCounter();
 
-      if (state.fcFilter !== 'all') {
-        buildFlashcardDeck(false);
+      const removedFromDeck =
+        (state.fcFilter === 'review' && rating === 'mastered') ||
+        (state.fcFilter === 'mastered' && rating === 'review');
+
+      if (removedFromDeck) {
+        state.fcDeck = state.fcDeck.filter(f => f.id !== fish.id);
+        if (state.fcIndex >= state.fcDeck.length) state.fcIndex = 0;
       } else {
         state.fcIndex = (state.fcIndex + 1) % state.fcDeck.length;
-        state.fcFlipped = false;
-        state.fcHintVisible = false;
       }
+
+      state.fcFlipped = false;
+      state.fcHintVisible = false;
       renderFlashcard();
     }
 
@@ -2433,23 +2439,32 @@
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-flip').addEventListener('click', () => {
+      document.getElementById('btn-fc-flip').addEventListener('click', (e) => {
+        e.stopPropagation();
         state.fcFlipped = true;
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-flip-back').addEventListener('click', () => {
+      document.getElementById('btn-fc-flip-back').addEventListener('click', (e) => {
+        e.stopPropagation();
         state.fcFlipped = false;
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-hint').addEventListener('click', () => {
+      document.getElementById('btn-fc-hint').addEventListener('click', (e) => {
+        e.stopPropagation();
         state.fcHintVisible = !state.fcHintVisible;
         renderFlashcard();
       });
 
-      document.getElementById('btn-fc-master').addEventListener('click', () => rateFlashcard('mastered'));
-      document.getElementById('btn-fc-review').addEventListener('click', () => rateFlashcard('review'));
+      document.getElementById('btn-fc-master').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rateFlashcard('mastered');
+      });
+      document.getElementById('btn-fc-review').addEventListener('click', (e) => {
+        e.stopPropagation();
+        rateFlashcard('review');
+      });
 
       document.getElementById('btn-fc-prev').addEventListener('click', () => {
         if (!state.fcDeck.length) return;
