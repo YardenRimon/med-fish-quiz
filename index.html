@@ -1699,7 +1699,7 @@
       } else {
         document.getElementById('quiz-floating-next').classList.add('hidden');
         if (state.activeTab === 'flashcards') {
-          buildFlashcardDeck(false);
+          buildFlashcardDeck(true);
           renderFlashcard();
         } else if (state.activeTab === 'guide') {
           renderGuide();
@@ -2041,7 +2041,7 @@
     }
 
     // ==================== FLASHCARDS LOGIC ====================
-    function buildFlashcardDeck(doShuffle = false) {
+    function buildFlashcardDeck(doShuffle = true) {
       let list = [...FISH_DATA];
       if (state.fcFilter === 'review') {
         list = list.filter(f => state.mastery[f.id] !== 'mastered');
@@ -2428,7 +2428,7 @@
         btn.addEventListener('click', () => {
           state.fcFilter = btn.dataset.fcfilter;
           state.fcIndex = 0;
-          buildFlashcardDeck(false);
+          buildFlashcardDeck(true);
           renderFlashcard();
         });
       });
@@ -2442,7 +2442,7 @@
       document.getElementById('btn-fc-show-all').addEventListener('click', () => {
         state.fcFilter = 'all';
         state.fcIndex = 0;
-        buildFlashcardDeck(false);
+        buildFlashcardDeck(true);
         renderFlashcard();
       });
 
@@ -2632,7 +2632,7 @@
         updateMasteryCounter();
         closeResetModal();
         startQuiz();
-        buildFlashcardDeck(false);
+        buildFlashcardDeck(true);
         if (state.activeTab === 'flashcards') renderFlashcard();
       });
 
