@@ -491,6 +491,16 @@
     </div>
   </div>
 
+  <!-- ==================== SPECIES MENTION HOVER PREVIEW ==================== -->
+  <div id="fish-hover-preview" role="tooltip" class="hidden fixed z-[70] pointer-events-none w-52 rounded-xl overflow-hidden border border-cyan-400/40 bg-[#071e33]/95 backdrop-blur-md shadow-2xl shadow-black/70">
+    <img id="fish-hover-img" src="" alt="" class="w-full h-28 object-cover bg-slate-950 block" />
+    <div class="px-2.5 py-2 text-right space-y-0.5">
+      <div id="fish-hover-name" class="text-xs font-bold text-white leading-tight"></div>
+      <div id="fish-hover-common" class="text-[11px] text-cyan-300/90 truncate"></div>
+      <div class="text-[10px] text-sky-300/70 pt-0.5">לחץ לפתיחת כרטיס המין</div>
+    </div>
+  </div>
+
   <!-- ==================== RESET CONFIRMATION MODAL ==================== -->
   <div id="reset-modal" role="dialog" aria-modal="true" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm overscroll-contain flex items-center justify-center p-4">
     <div class="glass-card rounded-2xl max-w-sm w-full p-5 space-y-4 shadow-2xl fade-in">
@@ -1495,11 +1505,102 @@
       document.getElementById('mastery-counter').textContent = `${masteredCount}/${FISH_DATA.length} נשלטים`;
     }
 
+    const FISH_MENTION_ALIASES = [
+      ['dakar_alexandroni', ['דקר אלכסנדרוני', 'דקר האלכסנדרוני', 'לוקוס חפש', 'לוקוס חאפש']],
+      ['dakar_haslaim', ['דקר הסלעים', 'לוקוס אדום']],
+      ['dakar_lavan', ['דקר לבן', 'הדקר הלבן', 'דקר המכמורת', 'לוקוס לבן']],
+      ['lokus_iradi', ['דוקרנית אדומה', 'לוקוס אירדי']],
+      ['sargus_had_af', ['סרגוס חד-אף', 'סרגוס חד אף', 'אספור', 'עספור', 'פונטצו', 'החד-אף', 'חד-אף']],
+      ['hadad', ['סרגוס הפסים', 'חדאד', 'זברה']],
+      ['sargus', ['סרגוס המסורטט', 'סרגוס מסורטט', 'סרגוס']],
+      ['denis', ['ספרוס זהוב', 'דניס', 'צ׳יפורה', 'אג׳אג׳']],
+      ['farida', ['ספרוס מצוי', 'הספרוס המצוי', 'פארידה']],
+      ['shinan', ['שינן הניבים', 'דנטקס']],
+      ['marmir', ['שישן מסורטט', 'מרמיר', 'מרמור']],
+      ['buri', ['קיפון בורי', 'קיפון גדול ראש', 'בורי']],
+      ['lavrak', ['לברק אירופי', 'לברק']],
+      ['intias', ['סריולה אטלנטית', 'סריול אטלנטי', 'אינטיאס', 'שולה']],
+      ['barracuda', ['אספירנה מליטה', 'אספירנה', 'ברקודה', 'מליטה']],
+      ['palamida', ['סקומברן זריז', 'פלמידה לבנה']],
+      ['tunit', ['טונית אטלנטית', 'פלמידה שחורה', 'טונה קטנה']],
+      ['sarda', ['פלמידה אטלנטית', 'סרדה', 'בוניטו', 'פלמידה']],
+      ['aras', ['סיכן משויש', 'אראס', 'קומוניסט']],
+      ['zeharon', ['זהרון הדור', 'זהרון', 'דג אריה']],
+      ['laginon', ['לגינון נודד', 'לגינון', 'אבו נפחא']],
+      ['shfamit', ['שפמית ארסית', 'שפמית מפוספסת', 'שפמיות', 'שפמית']],
+      ['akravnon', ['עקרבנון']],
+      ['drakon_yam', ['דרקון ים', 'טרכן', 'דג עכביש']],
+      ['morena', ['מורנה ים-תיכונית', 'מורנה']],
+      ['trigon', ['טריגון מצוי', 'טריגון', 'חתול ים', 'מחבטן']],
+      ['gitaran', ['גיטרן מובהק', 'גיטרן']],
+      ['musar_yam', ['מוסר ים', 'מוסר מלכותי', 'קורבינה']],
+      ['trulus', ['צנינון אטלנטי', 'טרולוס', 'טרכון']],
+      ['gombar', ['גומבר']],
+      ['dorado', ['רעמתן כחול', 'רעמתן כחלחל', 'דוראדו', 'מאהי-מאהי']],
+      ['bumhit', ['בומחיט', 'חצי-מקור']]
+    ];
+
+    const FISH_MENTION_MAP = new Map();
+    const _mentionTerms = [];
+    for (const [fishId, phrases] of FISH_MENTION_ALIASES) {
+      for (const phrase of phrases) {
+        FISH_MENTION_MAP.set(phrase, fishId);
+        _mentionTerms.push(phrase);
+      }
+    }
+    _mentionTerms.sort((a, b) => b.length - a.length);
+    const FISH_MENTION_REGEX = new RegExp(
+      `(^|[^\\u05D0-\\u05EA])([למכבשהו]{0,2})(${_mentionTerms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|')})(?![\\u05D0-\\u05EA])`,
+      'g'
+    );
+
+    function linkifyFishMentions(text, currentFishId) {
+      if (!text) return '';
+      return String(text).replace(FISH_MENTION_REGEX, (full, leading, prefix, term) => {
+        const targetId = FISH_MENTION_MAP.get(term);
+        if (!targetId || targetId === currentFishId) return full;
+        const targetFish = FISH_DATA.find(f => f.id === targetId);
+        const aria = targetFish ? `פתח כרטיס מין: ${targetFish.hebrewName}` : 'פתח כרטיס מין';
+        return `${leading}<button type="button" class="fish-mention-link inline font-semibold text-cyan-200 hover:text-white underline decoration-cyan-400/60 decoration-dotted underline-offset-4 hover:decoration-solid cursor-pointer transition rounded-sm focus:outline-none focus:ring-1 focus:ring-cyan-400" data-fish-mention="${targetId}" aria-label="${aria}">${prefix}${term}</button>`;
+      });
+    }
+
+    function showFishHoverPreview(anchorEl) {
+      const fishId = anchorEl?.dataset?.fishMention;
+      const fish = FISH_DATA.find(f => f.id === fishId);
+      const preview = document.getElementById('fish-hover-preview');
+      if (!fish || !preview) return;
+
+      const imgEl = document.getElementById('fish-hover-img');
+      imgEl.src = fish.image;
+      imgEl.alt = fish.hebrewName;
+      document.getElementById('fish-hover-name').textContent = fish.hebrewName;
+      document.getElementById('fish-hover-common').textContent = fish.commonName;
+
+      preview.classList.remove('hidden');
+      const anchorRect = anchorEl.getBoundingClientRect();
+      const previewRect = preview.getBoundingClientRect();
+      const gap = 8;
+      let top = anchorRect.top - previewRect.height - gap;
+      if (top < 8) {
+        top = Math.min(window.innerHeight - previewRect.height - 8, anchorRect.bottom + gap);
+      }
+      let left = anchorRect.left + (anchorRect.width - previewRect.width) / 2;
+      left = Math.max(8, Math.min(window.innerWidth - previewRect.width - 8, left));
+      preview.style.top = `${Math.round(top)}px`;
+      preview.style.left = `${Math.round(left)}px`;
+    }
+
+    function hideFishHoverPreview() {
+      const preview = document.getElementById('fish-hover-preview');
+      if (preview) preview.classList.add('hidden');
+    }
+
     function buildFishDetailsHTML(fish, showMasteryButton = false) {
       const st = getStatusStyle(fish.status);
       const isMastered = state.mastery[fish.id] === 'mastered';
       const markersHtml = fish.idMarkers
-        .map(m => `<li class="flex items-start gap-2"><span class="text-cyan-400 mt-0.5 shrink-0">•</span><span>${m}</span></li>`)
+        .map(m => `<li class="flex items-start gap-2"><span class="text-cyan-400 mt-0.5 shrink-0">•</span><span>${linkifyFishMentions(m, fish.id)}</span></li>`)
         .join('');
 
       return `
@@ -1560,20 +1661,20 @@
                   <i data-lucide="ruler" class="w-3.5 h-3.5"></i>
                   <span>גודל מינימום וחוק</span>
                 </div>
-                <p class="text-xs sm:text-sm text-white/90">${fish.minLength}</p>
+                <p class="text-xs sm:text-sm text-white/90">${linkifyFishMentions(fish.minLength, fish.id)}</p>
               </div>
               <div class="p-3 rounded-xl bg-slate-900/65 border border-sky-400/15 space-y-1">
                 <div class="text-xs font-bold text-sky-300 flex items-center gap-1.5">
                   <i data-lucide="compass" class="w-3.5 h-3.5"></i>
                   <span>בית גידול והתנהגות</span>
                 </div>
-                <p class="text-xs sm:text-sm text-sky-100/85">${fish.habitat}</p>
+                <p class="text-xs sm:text-sm text-sky-100/85">${linkifyFishMentions(fish.habitat, fish.id)}</p>
               </div>
             </div>
           </div>
 
           <div class="p-3 rounded-xl ${fish.status === 'protected' || fish.status === 'toxic' ? 'bg-rose-950/45 border-rose-500/40' : 'bg-amber-950/30 border-amber-500/30'} border text-xs sm:text-sm text-amber-100/95 leading-relaxed">
-            <strong class="text-amber-300">שימו לב / מבלבלים עם: </strong>${fish.lookalike}
+            <strong class="text-amber-300">שימו לב / מבלבלים עם: </strong>${linkifyFishMentions(fish.lookalike, fish.id)}
           </div>
 
           <!-- Culinary Recommendations -->
@@ -1582,7 +1683,7 @@
               <i data-lucide="utensils" class="w-3.5 h-3.5"></i>
               <span>המלצות אכילה והכנה</span>
             </div>
-            <p class="text-xs sm:text-sm text-emerald-50/90 leading-relaxed">${fish.culinary}</p>
+            <p class="text-xs sm:text-sm text-emerald-50/90 leading-relaxed">${linkifyFishMentions(fish.culinary, fish.id)}</p>
           </div>
 
           <!-- Authentic Diver Photo Gallery -->
@@ -2646,11 +2747,39 @@
         if (e.target.id === 'lightbox-modal') closeLightbox();
       });
       document.addEventListener('click', (e) => {
+        const mentionBtn = e.target.closest('[data-fish-mention]');
+        if (mentionBtn) {
+          e.stopPropagation();
+          hideFishHoverPreview();
+          const targetFish = FISH_DATA.find(f => f.id === mentionBtn.dataset.fishMention);
+          if (targetFish) openFishModal(targetFish);
+          return;
+        }
         const btn = e.target.closest('[data-gallery-fish]');
         if (!btn) return;
         e.stopPropagation();
         openLightbox(btn.dataset.galleryFish, parseInt(btn.dataset.galleryIdx || '0', 10));
       });
+      document.addEventListener('pointerover', (e) => {
+        if (e.pointerType === 'touch') return;
+        const mentionBtn = e.target.closest('[data-fish-mention]');
+        if (mentionBtn) showFishHoverPreview(mentionBtn);
+      });
+      document.addEventListener('pointerout', (e) => {
+        const mentionBtn = e.target.closest('[data-fish-mention]');
+        if (mentionBtn && (!e.relatedTarget || !mentionBtn.contains(e.relatedTarget))) {
+          hideFishHoverPreview();
+        }
+      });
+      document.addEventListener('focusin', (e) => {
+        const mentionBtn = e.target.closest('[data-fish-mention]');
+        if (mentionBtn) showFishHoverPreview(mentionBtn);
+      });
+      document.addEventListener('focusout', (e) => {
+        const mentionBtn = e.target.closest('[data-fish-mention]');
+        if (mentionBtn) hideFishHoverPreview();
+      });
+      window.addEventListener('scroll', hideFishHoverPreview, { passive: true, capture: true });
 
       document.getElementById('btn-open-reset').addEventListener('click', openResetModal);
       document.getElementById('btn-cancel-reset').addEventListener('click', closeResetModal);
