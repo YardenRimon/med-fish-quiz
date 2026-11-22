@@ -139,7 +139,7 @@
       <div class="flex items-center gap-2">
         <div class="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-400/30 text-emerald-200 text-xs font-medium" title="דגים שסומנו כנשלטים">
           <i data-lucide="award" class="w-3.5 h-3.5 text-emerald-400"></i>
-          <span id="mastery-counter">0/26 נשלטים</span>
+          <span id="mastery-counter">0/32 נשלטים</span>
         </div>
         <button id="btn-open-feedback" type="button" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/30 text-sky-100 flex items-center gap-1.5 transition" title="דווח על טעות או הצע שיפור">
           <i data-lucide="message-square-plus" class="w-3.5 h-3.5 text-cyan-300"></i>
@@ -2039,7 +2039,7 @@
         state.quizScore += 1;
         state.quizStreak += 1;
         if (state.quizStreak > state.quizBestStreak) state.quizBestStreak = state.quizStreak;
-        if (!state.mastery[fish.id]) {
+        if (state.mastery[fish.id] !== 'mastered') {
           state.mastery[fish.id] = 'mastered';
           saveProgress();
           updateMasteryCounter();
