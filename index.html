@@ -4,6 +4,36 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>מגדיר וחידון צוללנים – דגי הים התיכון</title>
+  <meta name="description" content="מגדיר אינטראקטיבי, כרטיסיות שינון וחידון זיהוי מהיר של דגי הים התיכון לצוללנים חופשיים בישראל – 32 מינים, דגשים לזיהוי במים, טורפים ומינים מסוכנים." />
+  <meta name="theme-color" content="#051524" />
+  <link rel="canonical" href="https://yardenrimon.github.io/med-fish-quiz/" />
+
+  <!-- Icons & PWA -->
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <link rel="icon" href="favicon.ico" sizes="32x32" />
+  <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
+  <link rel="manifest" href="site.webmanifest" />
+
+  <!-- Open Graph / Social Share Preview -->
+  <meta property="og:type" content="website" />
+  <meta property="og:locale" content="he_IL" />
+  <meta property="og:site_name" content="זיהוי דגי הים התיכון" />
+  <meta property="og:title" content="מגדיר וחידון צוללנים – דגי הים התיכון" />
+  <meta property="og:description" content="מגדיר אינטראקטיבי, כרטיסיות שינון וחידון זיהוי מהיר של דגי הים התיכון לצוללנים חופשיים בישראל – 32 מינים, דגשים לזיהוי במים, טורפים ומינים מסוכנים." />
+  <meta property="og:url" content="https://yardenrimon.github.io/med-fish-quiz/" />
+  <meta property="og:image" content="https://yardenrimon.github.io/med-fish-quiz/og-image.png" />
+  <meta property="og:image:type" content="image/png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="מגדיר וחידון צוללנים – דגי הים התיכון עם איורי דגים מהים התיכון" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="מגדיר וחידון צוללנים – דגי הים התיכון" />
+  <meta name="twitter:description" content="מגדיר אינטראקטיבי, כרטיסיות שינון וחידון זיהוי מהיר של דגי הים התיכון לצוללנים חופשיים בישראל." />
+  <meta name="twitter:image" content="https://yardenrimon.github.io/med-fish-quiz/og-image.png" />
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
   <script data-goatcounter="https://yardenr.goatcounter.com/count" async src="https://gc.zgo.at/count.js"></script>
@@ -82,9 +112,7 @@
   <header id="app-header" class="sticky top-0 z-30 border-b border-sky-400/15 bg-[#051524]/92 backdrop-blur-md transition-transform duration-300 ease-out will-change-transform">
     <div class="max-w-5xl mx-auto px-3 sm:px-5 py-2 sm:py-3 flex flex-wrap items-center justify-between gap-2 sm:gap-3">
       <div class="flex items-center gap-2">
-        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-sky-400 to-cyan-600 flex items-center justify-center shadow-lg shadow-sky-900/50 shrink-0">
-          <i data-lucide="waves" class="w-4 h-4 sm:w-5 sm:h-5 text-slate-950"></i>
-        </div>
+        <img src="favicon.svg" alt="לוגו זיהוי דגי הים התיכון" class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl shadow-lg shadow-sky-900/50 shrink-0" />
         <div>
           <h1 class="text-sm sm:text-lg font-bold tracking-tight text-white leading-tight">זיהוי דגי הים התיכון</h1>
           <p class="hidden sm:block text-xs text-sky-300/80">אימון זיהוי מהיר לצוללן החופשי בישראל</p>
@@ -386,7 +414,10 @@
   <footer class="border-t border-sky-400/15 bg-[#04111d]/80 mt-6">
     <div class="max-w-5xl mx-auto px-4 sm:px-5 py-6 text-xs text-sky-300/70 space-y-2.5 leading-relaxed">
       <div class="flex flex-wrap items-center justify-between gap-2">
-        <span class="font-semibold text-sky-200/85">הבהרה משפטית ובטיחותית</span>
+        <div class="flex items-center gap-2">
+          <img src="favicon.svg" alt="" aria-hidden="true" class="w-5 h-5 rounded-md shrink-0" />
+          <span class="font-semibold text-sky-200/85">הבהרה משפטית ובטיחותית</span>
+        </div>
         <button id="btn-footer-contact" type="button" class="inline-flex items-center gap-1.5 text-cyan-300 hover:text-cyan-200 font-semibold transition">
           <i data-lucide="message-square-plus" class="w-3.5 h-3.5"></i>
           <span>יצירת קשר / דיווח על טעות</span>
